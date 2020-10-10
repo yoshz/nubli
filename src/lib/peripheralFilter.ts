@@ -1,3 +1,3 @@
 export interface PeripheralFilter {
-    handle(peripheral: import("noble").Peripheral): boolean;
+    handle(peripheral: import("@abandonware/noble").Peripheral): boolean;
 }

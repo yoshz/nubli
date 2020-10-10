@@ -23,10 +23,10 @@ export class SmartLock extends Events.EventEmitter {
     static readonly NUKI_USER_SPECIFIC_DATA_IO_CHARACTERISTIC_UUID = "a92ee202550111e4916c0800200c9a66";
 
     private nubli: Nubli;
-    private device: import("noble").Peripheral;
-    private nukiPairingCharacteristic: import("noble").Characteristic | null
-    private nukiServiceCharacteristic: import("noble").Characteristic | null
-    private nukiUserCharacteristic: import("noble").Characteristic | null;
+    private device: import("@abandonware/noble").Peripheral;
+    private nukiPairingCharacteristic: import("@abandonware/noble").Characteristic | null
+    private nukiServiceCharacteristic: import("@abandonware/noble").Characteristic | null
+    private nukiUserCharacteristic: import("@abandonware/noble").Characteristic | null;
     private config: NukiConfig | null = null;
     private state: GeneralState = GeneralState.IDLE;
     private partialPayload: Buffer = new Buffer(0);
@@ -35,7 +35,7 @@ export class SmartLock extends Events.EventEmitter {
     private lastManufacturerDataReceived: Date = new Date();
     private _stale: boolean = false;
 
-    constructor(nubli: Nubli, device: import("noble").Peripheral) {
+    constructor(nubli: Nubli, device: import("@abandonware/noble").Peripheral) {
         super();
 
         this.nubli = nubli;
@@ -75,11 +75,11 @@ export class SmartLock extends Events.EventEmitter {
         if (data.length == 25) {
             let type: number = data.readUInt8(2);
             let dataLength: number = data.readUInt8(3);
-            
+
             // 0x02 == iBeacon
             if (type == 2 && dataLength == 21) {
                 let serviceUuid: string = data.slice(4, 20).toString('hex');
-                
+
                 if (serviceUuid == SmartLock.NUKI_SERVICE_UUID) {
                     let smartLockId: string = data.slice(20, 24).toString('hex').toUpperCase();
                     let rssi: number = data.readInt8(24);
@@ -177,7 +177,7 @@ export class SmartLock extends Events.EventEmitter {
             if (path === undefined) {
                 path = this.nubli.configPath;
             }
-            
+
             if (!this.config) {
                 reject();
             } else {
@@ -230,7 +230,7 @@ export class SmartLock extends Events.EventEmitter {
             this.device.discoverSomeServicesAndCharacteristics(
                 [SmartLock.NUKI_SERVICE_UUID, SmartLock.NUKI_PAIRING_SERVICE_UUID],
                 [],
-                (error: string, services: import("noble").Service[]) => {
+                (error: string, services: import("@abandonware/noble").Service[]) => {
                     if (error) {
                         reject(error);
                     } else {
@@ -284,7 +284,7 @@ export class SmartLock extends Events.EventEmitter {
             let errorMessage = ErrorHandler.errorToMessage(GeneralError.BAD_CRC);
 
             this.emit("error", errorMessage);
-            
+
             return false;
         }
 
@@ -329,7 +329,7 @@ export class SmartLock extends Events.EventEmitter {
             }
 
             this.currentCommand = command;
-            
+
             await this.writeEncryptedData(this.currentCommand.requestData(this.config!));
 
             let response: SmartLockResponse;
@@ -343,7 +343,7 @@ export class SmartLock extends Events.EventEmitter {
             }
 
             this.state = GeneralState.IDLE;
-    
+
             resolve(response);
         });
     }
@@ -371,7 +371,7 @@ export class SmartLock extends Events.EventEmitter {
 
         return await this.executeCommand(new RequestAdvancedConfigCommand());
     }
-    
+
     async readLockState(): Promise<SmartLockResponse> {
         this.debug("Reading lock state");
 
@@ -438,7 +438,7 @@ export class SmartLock extends Events.EventEmitter {
                     if (error) {
                         reject(error);
                     }
-    
+
                     resolve();
                 });
             } else {
@@ -565,7 +565,7 @@ export class SmartLock extends Events.EventEmitter {
         }
 
         let commandIdentifier: number = decryptedPayload.readUInt16LE(4);
-        
+
         let decryptedData: Buffer = decryptedPayload.slice(6, decryptedPayload.length - 2);
 
         if (this.currentCommand) {

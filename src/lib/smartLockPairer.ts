@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { SmartLock } from "./smartLock";
 
 export class SmartLockPairer extends Events.EventEmitter {
-    private nukiPairingCharacteristic: import("noble").Characteristic;
+    private nukiPairingCharacteristic: import("@abandonware/noble").Characteristic;
     private state: PairingState = PairingState.IDLE;
     private config: NukiConfig;
     private partialPayload: Buffer | null = null;
@@ -16,7 +16,7 @@ export class SmartLockPairer extends Events.EventEmitter {
     // The first packet should not be verified as it does not contain any CRC and is only partial.
     private verifyCRC: boolean = false;
 
-    constructor(nukiPairingCharacteristic: import("noble").Characteristic, nukiConfig: NukiConfig, asBridge: boolean) {
+    constructor(nukiPairingCharacteristic: import("@abandonware/noble").Characteristic, nukiConfig: NukiConfig, asBridge: boolean) {
         super();
 
         if (nukiPairingCharacteristic === null) {
@@ -79,7 +79,7 @@ export class SmartLockPairer extends Events.EventEmitter {
             let errorMessage = ErrorHandler.errorToMessage(GeneralError.BAD_CRC);
 
             this.emit("pairingFailed", errorMessage);
-            
+
             return false;
         }
 
@@ -169,7 +169,7 @@ export class SmartLockPairer extends Events.EventEmitter {
                 this.state = PairingState.REQ_CHALLENGE_AUTH;
 
                 break;
-            
+
             // Smartlock has sent the first part of the second challenge.
             case PairingState.REQ_CHALLENGE_AUTH:
                 if (this.getCommandFromPayload(payload) != Command.CHALLENGE) {
@@ -199,7 +199,7 @@ export class SmartLockPairer extends Events.EventEmitter {
                 data = SmartLock.prepareCommand(Command.AUTH_DATA, data);
 
                 this.writeData(data);
-                
+
                 this.verifyCRC = false;
                 this.state = PairingState.REQ_AUTH_ID_A;
 
@@ -291,7 +291,7 @@ export class SmartLockPairer extends Events.EventEmitter {
             // We are an app
             id.writeUInt8(0, 0);
         }
-        
+
         id.writeUInt32LE(this.config.appId, 1);
 
         let name = new Buffer(32).fill(0);

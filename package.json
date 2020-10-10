@@ -44,6 +44,6 @@
         "crc": "^3.8.0",
         "hex-to-array-buffer": "^1.1.0",
         "libsodium-wrappers": "^0.7.4",
-        "noble": "^1.9.1"
+        "@abandonware/noble": "https://github.com/abandonware/noble.git"
     }
 }
